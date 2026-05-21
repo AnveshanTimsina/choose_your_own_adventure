@@ -1,34 +1,34 @@
 from sqlalchemy.orm import Session
-from core.config import settings
-
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from core.prompts import STORY_PROMPT
 from models.story import Story, StoryNode
 from core.models import StoryLLMResponse, StoryNodeLLM
+from core.config import settings
 
 class StoryGenerator:
     @classmethod
     def _get_llm(cls):
-        return ChatOpenAI(
-            model="gpt-4-turbo",
+        return ChatGoogleGenerativeAI(
+            model="gemini-3.5-flash",
+            api_key=settings.GEMINI_API_KEY
         )
     
     @classmethod
     def generate_story(cls, db: Session, session_id: str, theme: str) -> Story:
         llm = cls._get_llm()
         story_parser = PydanticOutputParser(pydantic_object=StoryLLMResponse)
-        prompt = ChatPromptTemplate.from_template([
+        prompt = ChatPromptTemplate.from_messages([
             (
                 "system",
                 STORY_PROMPT
             ),
             (
                 "human",
-                f"Create the story with the theme: {theme}"
+                "{theme}"
             )
-        ]).partial(format_instructions=story_parser.get_format_instructions())
+        ]).partial(format_instructions=story_parser.get_format_instructions(), theme=f"Create the story with the theme: {theme}")
 
         raw_response = llm.invoke(prompt.invoke({}))
 

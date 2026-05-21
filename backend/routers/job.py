@@ -3,9 +3,9 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Cookie
 from sqlalchemy.orm import Session
 
-from backend.db.database import get_db
-from backend.schemas.job import StoryJobResponse
-from backend.models.job import StoryJob
+from db.database import get_db
+from schemas.job import StoryJobResponse
+from models.job import StoryJob
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 

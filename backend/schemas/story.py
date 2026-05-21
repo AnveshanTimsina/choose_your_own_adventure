@@ -3,8 +3,8 @@ from datetime import datetime
 from pydantic import BaseModel
 
 class StoryOptionsSchema(BaseModel):
-    title: str
-    node_id: Optional[str] = None
+    text: str
+    next_node_id: Optional[int] = None
 
 class StoryNodeBase(BaseModel):
     content: str

@@ -5,14 +5,17 @@ from langchain_core.output_parsers import PydanticOutputParser
 from core.prompts import STORY_PROMPT
 from models.story import Story, StoryNode
 from core.models import StoryLLMResponse, StoryNodeLLM
-from core.config import settings
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class StoryGenerator:
     @classmethod
     def _get_llm(cls):
         return ChatGoogleGenerativeAI(
             model="gemini-3.5-flash",
-            api_key=settings.GEMINI_API_KEY
+            api_key=os.environ.get("GEMINI_API_KEY")
         )
     
     @classmethod
@@ -35,6 +38,13 @@ class StoryGenerator:
         response_text = raw_response
         if hasattr(raw_response, "content"):
             response_text = raw_response.content
+            
+            if isinstance(response_text, list):
+                response_text = "".join(
+                    item.get("text", "") 
+                    for item in response_text 
+                    if isinstance(item, dict)
+                )
 
         story_structure = story_parser.parse(response_text)
 

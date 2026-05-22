@@ -1,35 +1,12 @@
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 
 function StoryGame({story, onNewStory}) {
-    const [currentNodeId, setCurrentNodeId] = useState(null);
-    const [currentNode, setCurrentNode] = useState(null)
-    const [options, setOptions] = useState([])
-    const [isEnding, setIsEnding] = useState(false)
-    const [isWinningEnding, setIsWinningEnding] = useState(false)
+    const [currentNodeId, setCurrentNodeId] = useState(story?.root_node?.id || null);
 
-    useEffect(() => {
-        if (story && story.root_node) {
-            const rootNodeId = story.root_node.id
-            setCurrentNodeId(rootNodeId)
-        }
-    }, [story])
-
-    useEffect(() => {
-        if (currentNodeId && story && story.all_nodes) {
-            const node = story.all_nodes[currentNodeId]
-
-            setCurrentNode(node)
-            setIsEnding(node.is_ending)
-            setIsWinningEnding(node.is_winning_endig)
-
-            if (!node.is_ending && node.options && node.options.length > 0) {
-                setOptions(node.options)
-            } else {
-                setOptions([])
-            }
-        }
-    }, [currentNodeId, story])
-
+    const currentNode = currentNodeId && story?.all_nodes ? story.all_nodes[currentNodeId] : null;
+    const isEnding = currentNode?.is_ending || false;
+    const isWinningEnding = currentNode?.is_winning_ending || false;
+    const options = (!isEnding && currentNode?.options?.length > 0) ? currentNode.options : [];
 
     const chooseOption = (optionId) => {
         setCurrentNodeId(optionId)
@@ -61,8 +38,8 @@ function StoryGame({story, onNewStory}) {
                         <div className="options-list">
                             {options.map((option, index) => {
                                 return <button
-                                        key={index}
-                                        onClick={() => chooseOption(option.node_id)}
+                                        key={option.next_node_id ?? index}
+                                        onClick={() => chooseOption(option.next_node_id ?? option.node_id)}
                                         className="option-btn"
                                         >
                                         {option.text}
